@@ -63,7 +63,7 @@ if __name__ == "__main__":
     #         row_index = elevation_data.index(row)
     #         column_index = elevation_data[row_index].index(column)
     #         alpha_value = calculate_alpha_value(min_elevation, max_elevation, column)
-    #         image.putpixel((row_index, column_index), alpha_value)
+    #         image.putpixel((column_index, row_index), alpha_value)
     # image.save('map.png')
 
     image = Image.new('RGBA', (image_width, image_height), (0, 0, 0, 0))
@@ -72,11 +72,11 @@ if __name__ == "__main__":
             row_index = elevation_data.index(row)
             column_index = elevation_data[row_index].index(column)
             alpha_value = calculate_alpha_value(min_elevation, max_elevation, column)
-            image.putpixel((row_index, column_index), (255, 255, 255, alpha_value))
+            image.putpixel((column_index, row_index), (255, 255, 255, alpha_value))
     image.save('map.png')
 
     # TODO:
-    # figure out the putpixel() part of the above loop(s) - specifically the second parameter (column)
+    # make map.png look like example in README
 
 
 
