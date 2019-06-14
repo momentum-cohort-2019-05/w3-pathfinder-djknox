@@ -69,6 +69,7 @@ def draw_elevation_map_grey_scale(elevation_data):
     image.save('map.png')
 
     print("Done drawing!")
+    return image
 
 
 def draw_elevation_map_rgba(elevation_data):
@@ -92,6 +93,7 @@ def draw_elevation_map_rgba(elevation_data):
     image.save('map.png')
 
     print("Done drawing!")
+    return image
 
 
 def greedy_walk_to_next_pixel(elevation_data, start_row, start_column):
@@ -144,8 +146,19 @@ if __name__ == "__main__":
         elevation_data = read_elevation_data_into_2d_list(file)
 
     # Using the Pillow library, create an elevation map from the data. Higher elevations should be brighter; lower elevations darker.
-    draw_elevation_map_rgba(elevation_data)
+    image = draw_elevation_map_rgba(elevation_data)
 
     # TODO:
     # make map.png look like exactly like example in README (?)
     # add the ability to start from the left edge of the map on any row (y-position) and calculate and draw a path across the map, using the greedy algorithm
+
+    # given a starting point, loop through all the columns with greedy_walk_to_next_pixel until get to the end
+    pixel_row = 300
+    pixel_column = 0
+    image_width = len(elevation_data[0])
+    print("Drawing path...")
+    for pixel in range(image_width - 1):
+        pixel_row, pixel_column = greedy_walk_to_next_pixel(elevation_data, pixel_row, pixel_column)
+        image.putpixel((pixel_column, pixel_row), (0, 0, 255, 255))
+    image.save('map_path.png')
+    print("Done drawing path!")
