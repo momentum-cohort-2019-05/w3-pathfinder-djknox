@@ -50,7 +50,7 @@ def calculate_alpha_value(min_elevation, max_elevation, elevation_value):
 
 def draw_elevation_map_grey_scale(elevation_data):
     """
-    Given a 2d array of elevation data, draw an elevation map in greyscale and save as 'map.png'.        
+    Given a 2d list of elevation data, draw an elevation map in greyscale and save as 'map.png'.        
     """
     print("Drawing an elevation map in greyscale...")
 
@@ -73,7 +73,7 @@ def draw_elevation_map_grey_scale(elevation_data):
 
 def draw_elevation_map_rgba(elevation_data):
     """
-    Given a 2d array of elevation data, draw an elevation map in RGBA and save as 'map.png'.
+    Given a 2d list of elevation data, draw an elevation map in RGBA and save as 'map.png'.
     """
     print("Drawing elevation map in RGBA...")
 
@@ -95,10 +95,14 @@ def draw_elevation_map_rgba(elevation_data):
 
 
 def greedy_walk_to_next_pixel(elevation_data, start_row, start_column):
+    """
+    Given a 2d list, a start row, and a start column, return the next row and next column in the list for the element that has the least difference.
+    """
     current_pixel = elevation_data[start_row][start_column]
-    forward_pixel = elevation_data[start_row][start_column + 1]
-    forward_top_pixel = elevation_data[start_row - 1][start_column + 1]
-    forward_bottom_pixel = elevation_data[start_row + 1][start_column + 1]
+    next_pixel_column = start_column + 1
+    forward_pixel = elevation_data[start_row][next_pixel_column]
+    forward_top_pixel = elevation_data[start_row - 1][next_pixel_column]
+    forward_bottom_pixel = elevation_data[start_row + 1][next_pixel_column]
     difference_in_forward = abs(current_pixel - forward_pixel)
     difference_in_forward_top = abs(current_pixel - forward_top_pixel)
     difference_in_forward_bottom = abs(current_pixel - forward_bottom_pixel)
@@ -106,22 +110,18 @@ def greedy_walk_to_next_pixel(elevation_data, start_row, start_column):
     # if difference_in_forward has the least difference
     if difference_in_forward_top > difference_in_forward < difference_in_forward_bottom:
         next_pixel_row = start_row
-        next_pixel_column = start_column + 1
 
     # if difference_in_forward is tied with any other pixels
     if difference_in_forward == difference_in_forward_top or difference_in_forward == difference_in_forward_bottom:
         next_pixel_row = start_row
-        next_pixel_column = start_column + 1
     
     # if difference_in_forward_top has the least difference
     if difference_in_forward > difference_in_forward_top < difference_in_forward_bottom:
         next_pixel_row = start_row - 1
-        next_pixel_column = start_column + 1
 
     # if difference_in_forward_bottom has the least difference
     if difference_in_forward_top > difference_in_forward_bottom < difference_in_forward:
         next_pixel_row = start_row + 1
-        next_pixel_column = start_column + 1
 
     # if difference_in_forward_top is tied with difference_in_forward_bottom
     if difference_in_forward_top == difference_in_forward_bottom:
@@ -131,10 +131,9 @@ def greedy_walk_to_next_pixel(elevation_data, start_row, start_column):
 
         if chosen_pixel == forward_top_pixel:
             next_pixel_row = start_row - 1
-            next_pixel_column = start_column + 1
+
         elif chosen_pixel == forward_bottom_pixel:
             next_pixel_row = start_row + 1
-            next_pixel_column = start_column + 1
 
     return next_pixel_row, next_pixel_column
 

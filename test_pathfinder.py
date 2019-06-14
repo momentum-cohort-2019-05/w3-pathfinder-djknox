@@ -28,12 +28,15 @@ def test_alpha_value_can_be_calculated():
 
 def test_next_pixel_can_be_found_with_greedy_algorithm():
     # 11 3  146
-    # 43 56 54
+    # 43 8 54
     # 2  8  43
     # 48 10 112
     # 74 9  28
-    two_d_list = [[11, 3, 146], [43, 56, 54], [2, 8, 43], [48, 10, 112], [74, 9, 28]]
-    start_row = 3
+    two_d_list = [[11, 3, 146], [43, 8, 54], [2, 8, 43], [48, 10, 112], [74, 9, 28]]
+    start_row = 2
     start_column = 0
     next_pixel_row, next_pixel_column = pathfinder.greedy_walk_to_next_pixel(two_d_list, start_row, start_column)
-    assert(two_d_list[next_pixel_row][next_pixel_column] == 10)
+
+    assert(next_pixel_row == 2)
+    assert(next_pixel_column == start_column + 1)
+    assert(two_d_list[next_pixel_row][next_pixel_column] == 8)
