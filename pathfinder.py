@@ -68,7 +68,7 @@ def draw_elevation_map_grey_scale(elevation_data):
             image.putpixel((column_index, row_index), alpha_value)
     image.save('map.png')
 
-    print("Done drawing!")
+    print("Done drawing elevation map!")
     return image
 
 
@@ -92,7 +92,7 @@ def draw_elevation_map_rgba(elevation_data):
             image.putpixel((column_index, row_index), (255, 255, 255, alpha_value))
     image.save('map.png')
 
-    print("Done drawing!")
+    print("Done drawing elevation map!")
     return image
 
 
@@ -140,6 +140,20 @@ def greedy_walk_to_next_pixel(elevation_data, start_row, start_column):
     return next_pixel_row, next_pixel_column
 
 
+def draw_path_of_least_resistance(image, elevation_data, pixel_row, pixel_column):
+    """
+    Given an image, a 2d list of elevation data, and a starting pixel row and column, draw the path of least resistance on the image using the greedy algorithm.
+    """
+    print("Drawing path of least resistance on map...")
+    for pixel in range(len(elevation_data[0]) - 1):
+        pixel_row, pixel_column = greedy_walk_to_next_pixel(elevation_data, pixel_row, pixel_column)
+        image.putpixel((pixel_column, pixel_row), (0, 0, 255, 255))
+    image.save('map_path.png')
+
+    print("Done drawing path of least resistance on map!")
+    return image
+
+
 if __name__ == "__main__":
     # Read the data from elevation_small.txt into an appropriate data structure to get the elevation data.
     with open('elevation_small.txt') as file:
@@ -148,17 +162,11 @@ if __name__ == "__main__":
     # Using the Pillow library, create an elevation map from the data. Higher elevations should be brighter; lower elevations darker.
     image = draw_elevation_map_rgba(elevation_data)
 
-    # TODO:
-    # make map.png look like exactly like example in README (?)
-    # add the ability to start from the left edge of the map on any row (y-position) and calculate and draw a path across the map, using the greedy algorithm
-
     # given a starting point, loop through all the columns with greedy_walk_to_next_pixel until get to the end
     pixel_row = 300
     pixel_column = 0
-    image_width = len(elevation_data[0])
-    print("Drawing path...")
-    for pixel in range(image_width - 1):
-        pixel_row, pixel_column = greedy_walk_to_next_pixel(elevation_data, pixel_row, pixel_column)
-        image.putpixel((pixel_column, pixel_row), (0, 0, 255, 255))
-    image.save('map_path.png')
-    print("Done drawing path!")
+    image = draw_path_of_least_resistance(image, elevation_data, pixel_row, pixel_column)
+
+
+    # TODO:
+    # make map.png look like exactly like example in README (?)
