@@ -63,52 +63,31 @@ class ElevationMapPainter:
         return min_value
 
 
-    def calculate_alpha_value(self, elevation_value):
+    def calculate_color_value(self, elevation_value):
         """
-        Given an elevation value, calculate and return the alpha value (opacity setting in RGBA).
+        Given an elevation value, calculate and return the color setting (between 0 and 255).
         """
         return int(((elevation_value - self.min_elevation) / (self.max_elevation - self.min_elevation)) * 255)
 
 
-    def draw_elevation_map_grey_scale(self):
+    def draw_elevation_map(self, filename_to_save_as='map.png'):
         """
-        Given a 2d list of elevation data, draw an elevation map in greyscale and save as 'map.png'.        
+        Given a 2d list of elevation data, draw an elevation map and save as the given filename.
         """
-        print("Drawing an elevation map in greyscale...")
+        print("Drawing elevation map...")
 
-        image = Image.new('L', (self.image_width, self.image_height))
-        for row in self.elevation_data:
-            for column in row:
-                row_index = self.elevation_data.index(row)
-                column_index = self.elevation_data[row_index].index(column)
-                alpha_value = self.calculate_alpha_value(column)
-                image.putpixel((column_index, row_index), alpha_value)
-        image.save('map.png')
+        image = Image.new('RGBA', (self.image_width, self.image_height), (0, 0, 0, 255))
+        for row in range(self.image_width):
+            for column in range(self.image_height):
+                color_value = self.calculate_color_value(self.elevation_data[row][column])
+                image.putpixel((column, row), (color_value, color_value, color_value, 255))
+        image.save(filename_to_save_as)
 
         print("Done drawing elevation map!")
         return image
 
 
-    def draw_elevation_map_rgba(self):
-        """
-        Given a 2d list of elevation data, draw an elevation map in RGBA and save as 'map.png'.
-        """
-        print("Drawing elevation map in RGBA...")
-
-        image = Image.new('RGBA', (self.image_width, self.image_height), (0, 0, 0, 0))
-        for row in self.elevation_data:
-            for column in row:
-                row_index = self.elevation_data.index(row)
-                column_index = self.elevation_data[row_index].index(column)
-                alpha_value = self.calculate_alpha_value(column)
-                image.putpixel((column_index, row_index), (255, 255, 255, alpha_value))
-        image.save('map.png')
-
-        print("Done drawing elevation map!")
-        return image
-
-
-    def draw_path_of_least_resistance(self, image, pixel_row, pixel_column):
+    def draw_path_of_least_resistance(self, image, pixel_row, pixel_column, filename_to_save_as='map.png'):
         """
         Given an image and a starting pixel row and column, draw a path on the image using the greedy algorithm.
         """
@@ -118,13 +97,16 @@ class ElevationMapPainter:
         for pixel in range(self.image_width - 1):
             pixel_row, pixel_column = greedy_algorithm.greedy_walk_to_next_pixel(pixel_row, pixel_column)
             image.putpixel((pixel_column, pixel_row), (0, 0, 255, 255))
-        image.save('map_path.png')
+        image.save(filename_to_save_as)
 
         print("Done drawing path of least resistance on map!")
         return image
 
 
 class GreedyAlgorithm:
+    """
+    GreedyAlgorithm is a class for implementing an algorithm that steps through a 2d list based on least differences between element values.
+    """
     def __init__(self, elevation_data):
         self.elevation_data = elevation_data
 
@@ -180,7 +162,7 @@ if __name__ == "__main__":
     elevation_map_painter = ElevationMapPainter(elevation_map)
 
     # Using the Pillow library, create an elevation map from the data. Higher elevations should be brighter; lower elevations darker.
-    image = elevation_map_painter.draw_elevation_map_rgba()
+    image = elevation_map_painter.draw_elevation_map()
 
     # given an image and a starting point, loop through all the columns with greedy_walk_to_next_pixel until get to the end
     # start at the middle pixel on the east side of the map
