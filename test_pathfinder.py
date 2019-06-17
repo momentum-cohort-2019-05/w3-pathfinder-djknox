@@ -20,11 +20,11 @@ def test_min_elevation_can_be_found():
     assert(elevation_map_painter.find_min_elevation() == 3139)
 
 
-def test_alpha_value_can_be_calculated():
+def test_color_value_can_be_calculated():
     # max elevation should be 255
-    assert(elevation_map_painter.calculate_alpha_value(elevation_map_painter.max_elevation) == 255)
+    assert(elevation_map_painter.calculate_color_value(elevation_map_painter.max_elevation) == 255)
     # min elevation should be 0
-    assert(elevation_map_painter.calculate_alpha_value(elevation_map_painter.min_elevation) == 0)
+    assert(elevation_map_painter.calculate_color_value(elevation_map_painter.min_elevation) == 0)
 
 
 def test_next_pixel_can_be_found_with_greedy_algorithm():
@@ -34,10 +34,10 @@ def test_next_pixel_can_be_found_with_greedy_algorithm():
     # 48 10 112
     # 74 9  28
     two_d_list = [[11, 3, 146], [43, 8, 54], [2, 8, 43], [48, 10, 112], [74, 9, 28]]
-    greedy_algorithm = GreedyAlgorithm(two_d_list)
     start_row = 2
     start_column = 0
-    next_pixel_row, next_pixel_column = greedy_algorithm.greedy_walk_to_next_pixel(start_row, start_column)
+    greedy_algorithm = GreedyAlgorithm(two_d_list, start_row, start_column)
+    next_pixel_row, next_pixel_column = greedy_algorithm.get_next_row_and_column()
 
     assert(next_pixel_row == 2)
     assert(next_pixel_column == start_column + 1)

@@ -3,7 +3,6 @@ from PIL import Image
 # import random module for flipping a coin in the case of ties in the greedy algorithm
 import random
 
-
 class ElevationMap:
     """
     ElevationMap is a class for representing elevation data from a text file.
@@ -93,9 +92,9 @@ class ElevationMapPainter:
         """
         print(f"Drawing path of least resistance on map, starting at pixel coordinate: ({pixel_row}, {pixel_column})...")
         
-        greedy_algorithm = GreedyAlgorithm(self.elevation_data)
+        path_finder = PathFinder(self.elevation_data)
         for pixel in range(self.image_width - 1):
-            pixel_row, pixel_column = greedy_algorithm.greedy_walk_to_next_pixel(pixel_row, pixel_column)
+            pixel_row, pixel_column = path_finder.greedy_walk_to_next_pixel(pixel_row, pixel_column)
             image.putpixel((pixel_column, pixel_row), (0, 0, 255, 255))
         image.save(filename_to_save_as)
 
@@ -103,55 +102,132 @@ class ElevationMapPainter:
         return image
 
 
-class GreedyAlgorithm:
+    def draw_all_paths_of_least_resistance(self, image, filename_to_save_as='map.png'):
+        """
+        Given an image, draw all paths starting on the left side on the image using the greedy algorithm.
+        """
+        print(f"Drawing all paths of least resistance on map...")
+        pixel_column = 0
+        for pixel_row in range(elevation_map_painter.image_height - 1):
+            image = elevation_map_painter.draw_path_of_least_resistance(image, pixel_row, pixel_column)
+        image.save(filename_to_save_as)
+
+        print("Done drawing path of least resistance on map!")
+        return image
+
+
+class PathFinder:
     """
-    GreedyAlgorithm is a class for implementing an algorithm that steps through a 2d list based on least differences between element values.
+    PathFinder is a class that implements GreedyAlgorithm to step through a 2d list based on least differences between element values.
     """
     def __init__(self, elevation_data):
         self.elevation_data = elevation_data
 
+
     def greedy_walk_to_next_pixel(self, start_row, start_column):
+        greedy_algorithm = GreedyAlgorithm(self.elevation_data, start_row, start_column)
+        return greedy_algorithm.get_next_row_and_column()
+
+
+class GreedyAlgorithm:
+    """
+    GreedyAlgorithm is a class for determining the least differences between element values.
+    """
+    def __init__(self, elevation_data, start_row, start_column):
+        self.elevation_data = elevation_data
+        self.start_row = start_row
+        self.start_column = start_column
+        self.next_column = self.start_column + 1
+
+
+    def get_forward_top_row(self):
+        return self.start_row - 1
+
+
+    def get_forward_bottom_row(self):
+        return self.start_row + 1
+
+
+    def get_current_pixel_value(self):
+        return self.elevation_data[self.start_row][self.start_column]
+
+
+    def get_forward_pixel_value(self):
+        return self.elevation_data[self.start_row][self.next_column]
+
+
+    def get_forward_top_pixel_value(self):
+        return self.elevation_data[self.get_forward_top_row()][self.next_column]
+
+    
+    def get_forward_bottom_pixel_value(self):
+        return self.elevation_data[self.get_forward_bottom_row()][self.next_column]
+
+    
+    def get_difference_in_forward(self):
+        return abs(self.get_current_pixel_value() - self.get_forward_pixel_value())
+
+
+    def get_difference_in_forward_top(self):
+        return abs(self.get_current_pixel_value() - self.get_forward_top_pixel_value())
+
+
+    def get_difference_in_forward_bottom(self):
+        return abs(self.get_current_pixel_value() - self.get_forward_bottom_pixel_value())
+
+
+    def forward_has_the_least_difference(self):
+        return self.get_difference_in_forward_top() > self.get_difference_in_forward() < self.get_difference_in_forward_bottom()
+
+
+    def forward_has_tie_with_other_pixels(self):
+        return self.get_difference_in_forward() == self.get_difference_in_forward_top() or self.get_difference_in_forward() == self.get_difference_in_forward_bottom()
+
+
+    def forward_top_has_the_least_difference(self):
+        return self.get_difference_in_forward() > self.get_difference_in_forward_top() < self.get_difference_in_forward_bottom()
+
+    
+    def forward_bottom_has_the_least_difference(self):
+        return self.get_difference_in_forward_top() > self.get_difference_in_forward_bottom() < self.get_difference_in_forward()
+
+    
+    def forward_top_has_tie_with_forward_bottom(self):
+        list_of_diffs = [self.get_forward_top_pixel_value(), self.get_forward_bottom_pixel_value()]
+        coin_flip_result = random.randint(0, 1)
+        chosen_pixel = list_of_diffs[coin_flip_result]
+
+        if chosen_pixel is self.get_forward_top_pixel_value():
+            return self.get_forward_top_row()
+
+        elif chosen_pixel is self.get_forward_bottom_pixel_value():
+            return self.get_forward_bottom_row()
+
+
+    def get_next_row_and_column(self):
         """
-        Given a start row and a start column, return the next row and next column in the list for the element that has the least difference in elevation.
+        Return the next row and next column in the list for the element that has the least difference in elevation.
         """
-        current_pixel = self.elevation_data[start_row][start_column]
-        next_pixel_column = start_column + 1
-        forward_pixel = self.elevation_data[start_row][next_pixel_column]
-        forward_top_pixel = self.elevation_data[start_row - 1][next_pixel_column]
-        forward_bottom_pixel = self.elevation_data[start_row + 1][next_pixel_column]
-        difference_in_forward = abs(current_pixel - forward_pixel)
-        difference_in_forward_top = abs(current_pixel - forward_top_pixel)
-        difference_in_forward_bottom = abs(current_pixel - forward_bottom_pixel)
+        # TODO: if start_row is the first row, then don't consider the forward_top_pixel_value
+        # TODO: if start_row is the last row, then don't consider the forward_bottom_pixel_value
 
         # if difference_in_forward has the least difference
-        if difference_in_forward_top > difference_in_forward < difference_in_forward_bottom:
-            next_pixel_row = start_row
-
-        # if difference_in_forward is tied with any other pixels
-        if difference_in_forward == difference_in_forward_top or difference_in_forward == difference_in_forward_bottom:
-            next_pixel_row = start_row
+        if self.forward_has_the_least_difference() or self.forward_has_tie_with_other_pixels():
+            next_row = self.start_row
         
         # if difference_in_forward_top has the least difference
-        if difference_in_forward > difference_in_forward_top < difference_in_forward_bottom:
-            next_pixel_row = start_row - 1
+        elif self.forward_top_has_the_least_difference():
+            next_row = self.get_forward_top_row()
 
         # if difference_in_forward_bottom has the least difference
-        if difference_in_forward_top > difference_in_forward_bottom < difference_in_forward:
-            next_pixel_row = start_row + 1
+        elif self.forward_bottom_has_the_least_difference():
+            next_row = self.get_forward_bottom_row()
 
         # if difference_in_forward_top is tied with difference_in_forward_bottom
-        if difference_in_forward_top == difference_in_forward_bottom:
-            list_of_diffs = [forward_top_pixel, forward_bottom_pixel]
-            coin_flip_result = random.randint(0, 1)
-            chosen_pixel = list_of_diffs[coin_flip_result]
+        elif self.get_difference_in_forward_top() == self.get_difference_in_forward_bottom():
+            next_row = self.forward_top_has_tie_with_forward_bottom()
 
-            if chosen_pixel == forward_top_pixel:
-                next_pixel_row = start_row - 1
-
-            elif chosen_pixel == forward_bottom_pixel:
-                next_pixel_row = start_row + 1
-
-        return next_pixel_row, next_pixel_column
+        return next_row, self.next_column
 
 
 if __name__ == "__main__":
@@ -161,15 +237,15 @@ if __name__ == "__main__":
     # create new ElevationMapPainer object with the ElevationMap object
     elevation_map_painter = ElevationMapPainter(elevation_map)
 
-    # Using the Pillow library, create an elevation map from the data. Higher elevations should be brighter; lower elevations darker.
+    # Using the Pillow library, create an elevation map from the data
     image = elevation_map_painter.draw_elevation_map()
 
-    # given an image and a starting point, loop through all the columns with greedy_walk_to_next_pixel until get to the end
-    # start at the middle pixel on the east side of the map
-    pixel_row = len(elevation_map.elevation_data[0]) // 2
-    pixel_column = 0
-    image = elevation_map_painter.draw_path_of_least_resistance(image, pixel_row, pixel_column)
+    # given an image and a starting point, draw the path of least resistance
+    image = elevation_map_painter.draw_path_of_least_resistance(image, 300, 0)
 
+    # Starting from each location on the left-hand side of the map, plot an optimal path across the map.
+    # image = elevation_map_painter.draw_all_paths_of_least_resistance(image)
 
     # TODO:
-    # make map.png look like exactly like example in README (?)
+    # refactor greedy walk algorithm to work with pixels that are outside of the image
+    # get draw_all_paths_of_least_resistance() to properly draw all paths
